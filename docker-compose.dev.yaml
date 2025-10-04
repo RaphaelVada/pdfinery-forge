@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  pdff-core:
+    build: 
+      context: ./pdff-core
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./pdff-core:/app:cached  # Komplettes Projekt mounten
+    command: uv run uvicorn app.main:app --host 0.0.0.0 --reload
+  dev:
+    build:
+      context: .
+      dockerfile: dev.Dockerfile
+    volumes:
+      - .:/workspace:cached
+    working_dir: /workspace
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: sleep infinity

@@ -1,0 +1,21 @@
+{
+  "name": "Pdfinery Forge",
+  "dockerComposeFile": "../docker-compose.dev.yaml",
+  "service": "dev",
+  "workspaceFolder": "/workspace",
+  
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-azuretools.vscode-docker"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/workspace/pdff-core/.venv/bin/python"
+      }
+    }
+  },
+  
+  "postCreateCommand": "cd pdff-core && uv sync",
+  "remoteUser": "root"
+}
