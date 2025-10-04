@@ -8,7 +8,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./pdff-core:/app:cached  # Komplettes Projekt mounten
+      - ./pdff-core/app:/wrk/app:cached  # Komplettes Projekt mounten
     command: uv run uvicorn app.main:app --host 0.0.0.0 --reload
   dev:
     build:
