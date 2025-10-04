@@ -9,6 +9,9 @@ services:
       - "8000:8000"
     volumes:
       - ./pdff-core/app:/wrk/app:cached  # Komplettes Projekt mounten
+      - ./data/in:/data/in:cached
+      - ./data/out:/data/out:cached
+      - ./data/archive:/data/archive:cached
     command: uv run uvicorn app.main:app --host 0.0.0.0 --reload
   dev:
     build:
@@ -16,6 +19,7 @@ services:
       dockerfile: dev.Dockerfile
     volumes:
       - .:/workspace:cached
+      - ./data:/data:cached
     working_dir: /workspace
     environment:
       - PYTHONUNBUFFERED=1
