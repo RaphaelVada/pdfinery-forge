@@ -23,6 +23,7 @@ class Document(BaseModel):
     # Metadaten (anfangs leer)
     document_type: Optional[str] = None
     correspondent: Optional[str] = Field(None, description="Absender/Empfänger")
+    topic: Optional[str] = Field(None, description="Thema/Betreff des Dokuments")
     customer_id: Optional[str] = Field(None, description="Kunden-/Vertragsnummer")
     document_number: Optional[str] = Field(None, description="Rechnungs-/Dokumentnummer")
     document_date: Optional[date] = Field(None, description="Dokumentdatum")
@@ -31,6 +32,7 @@ class Document(BaseModel):
     def build_filename(
         document_type: Optional[str],
         correspondent: Optional[str],
+        topic: Optional[str] = None,
         customer_id: Optional[str] = None,
         document_number: Optional[str] = None,
         document_date: Optional[date] = None,
@@ -38,7 +40,7 @@ class Document(BaseModel):
     ) -> str:
         """
         Statische Methode zur Filename-Generierung ohne Object-Instanz.
-        Perfekt für Previews ohne Memory-Overhead.
+        Format: YYYYMMDD_Korrespondent_Thema_Dokumentnummer_Dokumenttyp.pdf
         """
         if not document_type or not correspondent:
             return fallback_filename
@@ -49,6 +51,9 @@ class Document(BaseModel):
             parts.append(document_date.strftime("%Y%m%d"))
         
         parts.append(correspondent.replace(" ", "_"))
+        
+        if topic:
+            parts.append(topic.replace(" ", "_"))
         
         if document_number:
             parts.append(document_number)
@@ -65,13 +70,13 @@ class Document(BaseModel):
         return self.build_filename(
             document_type=self.document_type,
             correspondent=self.correspondent,
+            topic=self.topic,
             customer_id=self.customer_id,
             document_number=self.document_number,
             document_date=self.document_date,
             fallback_filename=self.original_filename
         )
     
-    # Deprecated: Für Backwards-Compatibility
     def generate_filename(self) -> str:
         """DEPRECATED: Use .generated_filename property instead"""
         return self.generated_filename

@@ -1,0 +1,209 @@
+/* pdff-core/app/pages/static/css/editor.css */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-system);
+  background: var(--bg-gradient);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: var(--text-primary);
+}
+
+/* Header */
+header {
+  background: rgba(13, 77, 77, 0.4);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-glass);
+  padding: var(--space-lg) var(--space-2xl);
+  box-shadow: var(--shadow-md);
+}
+
+header h1 {
+  font-size: 1.5rem;
+  margin-bottom: var(--space-sm);
+}
+
+.current-filename {
+  font-family: var(--font-mono);
+  opacity: 0.8;
+  font-size: 0.9rem;
+}
+
+/* Main Container */
+.container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* PDF Viewer Panel */
+.pdf-viewer {
+  width: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-lg);
+}
+
+.pdf-embed {
+  background: var(--bg-white);
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  border: none;
+}
+
+/* Metadata Panel */
+.metadata-panel {
+  width: 50%;
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  border-left: 1px solid var(--border-glass);
+  display: flex;
+  flex-direction: column;
+}
+
+.metadata-form {
+  flex: 1;
+  padding: var(--space-2xl);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xl);
+}
+
+/* Form Sections */
+.form-section {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  padding: var(--space-xl);
+  border: 1px solid var(--border-glass);
+}
+
+.section-title {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-xl);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Buttons */
+.btn {
+  padding: var(--space-md) var(--space-xl);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  background: var(--bg-glass);
+  color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--bg-glass-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.8) 0%, rgba(5, 150, 105, 0.9) 100%);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 1) 100%);
+}
+
+/* Navigation */
+.navigation-buttons {
+  display: flex;
+  gap: var(--space-lg);
+}
+
+.navigation-buttons .btn {
+  flex: 1;
+}
+
+.navigation-info {
+  display: flex;
+  gap: var(--space-lg);
+  margin-top: var(--space-md);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.navigation-info > div {
+  flex: 1;
+  text-align: center;
+}
+
+/* Error Box */
+.error {
+  color: #ff6b6b;
+  padding: var(--space-lg);
+  background: rgba(255, 107, 107, 0.1);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-lg);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+/* Loading States */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Scrollbar Styling */
+.metadata-form::-webkit-scrollbar {
+  width: 8px;
+}
+
+.metadata-form::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.metadata-form::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.metadata-form::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .container {
+    flex-direction: column;
+  }
+  
+  .pdf-viewer,
+  .metadata-panel {
+    width: 100%;
+  }
+  
+  .pdf-viewer {
+    height: 40vh;
+  }
+}

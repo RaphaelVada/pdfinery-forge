@@ -3,338 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="pageTitle">PDF Metadaten bearbeiten - PDFF Core</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #0d4d4d 0%, #1a6b6b 50%, #267373 100%);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        header {
-            background: rgba(13, 77, 77, 0.4);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            padding: 1rem 2rem;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
-        }
-
-        .container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .pdf-viewer {
-            width: 50%;
-            background: rgba(255, 255, 255, 0.05);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-        }
-
-        .pdf-embed {
-            background: rgba(255, 255, 255, 0.95);
-            width: 100%;
-            height: 100%;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        .metadata-panel {
-            width: 50%;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(16px);
-            border-left: 1px solid rgba(255, 255, 255, 0.15);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .metadata-form {
-            flex: 1;
-            padding: 2rem;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
-
-        .form-section {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            padding: 1.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .section-title {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 1.5rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .filename-status {
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 8px;
-            padding: 1.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-        }
-
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            white-space: nowrap;
-        }
-
-        .status-badge.unsaved {
-            background: rgba(251, 191, 36, 0.2);
-            color: #fbbf24;
-        }
-
-        .status-badge.changed {
-            background: rgba(59, 130, 246, 0.2);
-            color: #3b82f6;
-        }
-
-        .status-badge.saved {
-            background: rgba(16, 185, 129, 0.2);
-            color: #10b981;
-        }
-
-        .status-badge.not-generatable {
-            background: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        .status-badge.unsaved .status-dot {
-            background: #fbbf24;
-        }
-
-        .status-badge.changed .status-dot {
-            background: #3b82f6;
-        }
-
-        .status-badge.saved .status-dot {
-            background: #10b981;
-        }
-
-        .status-badge.not-generatable .status-dot {
-            background: #ef4444;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .filename-display {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .filename-text {
-            flex: 1;
-            font-family: 'Courier New', monospace;
-            font-size: 0.95rem;
-            color: #ffffff;
-            word-break: break-all;
-            padding: 0.75rem;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 6px;
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        .filename-text.unsaved {
-            border-color: rgba(251, 191, 36, 0.5);
-            background: rgba(251, 191, 36, 0.1);
-        }
-
-        .filename-text.changed {
-            border-color: rgba(59, 130, 246, 0.5);
-            background: rgba(59, 130, 246, 0.1);
-        }
-
-        .filename-text.saved {
-            border-color: rgba(16, 185, 129, 0.5);
-            background: rgba(16, 185, 129, 0.1);
-        }
-
-        .filename-text.not-generatable {
-            border-color: rgba(239, 68, 68, 0.5);
-            background: rgba(239, 68, 68, 0.1);
-        }
-
-        .btn-save {
-            padding: 0.75rem 1.5rem;
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.8) 0%, rgba(5, 150, 105, 0.9) 100%);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-        }
-
-        .btn-save:hover:not(:disabled) {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 1) 100%);
-            transform: translateY(-2px);
-        }
-
-        .btn-save:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .btn-save.up-to-date {
-            opacity: 0.4;
-            cursor: not-allowed;
-            background: rgba(100, 100, 100, 0.5);
-        }
-
-        .navigation-section {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            padding: 1.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .navigation-buttons {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .btn-nav {
-            flex: 1;
-            padding: 0.75rem;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .btn-nav:hover:not(:disabled) {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateY(-2px);
-        }
-
-        .btn-nav:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 0.5rem;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 0.75rem;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            color: white;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(16, 185, 129, 0.6);
-        }
-
-        .form-group input.changed {
-            background: rgba(59, 130, 246, 0.15);
-            border-color: rgba(59, 130, 246, 0.5);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .form-actions {
-            padding: 1.5rem 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.15);
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 0.875rem;
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.8) 0%, rgba(5, 150, 105, 0.9) 100%);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-submit:hover {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 1) 100%);
-            transform: translateY(-2px);
-        }
-
-        .loading {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-
-        .error {
-            color: #ff6b6b;
-            padding: 1rem;
-            background: rgba(255, 107, 107, 0.1);
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-    </style>
+    <title>PDF Metadaten bearbeiten - PDFF Core</title>
+    
+    <!-- Design System -->
+    <link rel="stylesheet" href="/static/css/theme.css">
+    <link rel="stylesheet" href="/static/css/editor.css">
 </head>
 <body>
     <header>
@@ -343,477 +16,119 @@
     </header>
 
     <div class="container">
+        <!-- PDF Preview -->
         <div class="pdf-viewer">
             <iframe class="pdf-embed" id="pdfViewer"></iframe>
         </div>
 
+        <!-- Metadata Editor -->
         <div class="metadata-panel">
-            <form class="metadata-form" id="metadataForm">
+            <div class="metadata-form">
+                <!-- Error Display -->
                 <div id="errorBox" class="error" style="display: none;"></div>
 
-                <!-- Eingabefelder + Generierter Filename -->
+                <!-- Metadata Input Section -->
                 <div class="form-section">
                     <h3 class="section-title">📝 Metadaten bearbeiten</h3>
                     
-                    <div class="form-group">
-                        <label for="correspondent">Korrespondent</label>
-                        <input type="text" id="correspondent" name="correspondent" required>
-                    </div>
+                    <pdff-input-field
+                        name="correspondent"
+                        label="Korrespondent"
+                        type="text"
+                        required>
+                    </pdff-input-field>
 
-                    <div class="form-group">
-                        <label for="document_type">Dokumenttyp</label>
-                        <input type="text" id="document_type" name="document_type" required>
-                    </div>
+                    <pdff-input-field
+                        name="document_type"
+                        label="Dokumenttyp"
+                        type="text"
+                        required>
+                    </pdff-input-field>
 
-                    <div class="form-group">
-                        <label for="customer_id">Kundennummer (optional)</label>
-                        <input type="text" id="customer_id" name="customer_id">
-                    </div>
+                    <pdff-input-field
+                        name="topic"
+                        label="Thema/Betreff"
+                        type="text"
+                        placeholder="z.B. Jahresabrechnung 2024">
+                    </pdff-input-field>
 
-                    <div class="form-group">
-                        <label for="document_number">Dokumentnummer (optional)</label>
-                        <input type="text" id="document_number" name="document_number">
-                    </div>
+                    <pdff-input-field
+                        name="customer_id"
+                        label="Kundennummer (optional)"
+                        type="text">
+                    </pdff-input-field>
 
-                    <div class="form-group">
-                        <label for="document_date">Datum</label>
-                        <input type="date" id="document_date" name="document_date">
-                    </div>
+                    <pdff-input-field
+                        name="document_number"
+                        label="Dokumentnummer (optional)"
+                        type="text">
+                    </pdff-input-field>
 
-                    <div class="filename-status">
-                        <div class="status-indicator">
-                            <div class="status-badge unsaved" id="statusBadge">
-                                <span class="status-dot"></span>
-                                <span id="statusText">Nicht gespeichert</span>
-                            </div>
-                        </div>
-                        <div class="filename-display">
-                            <div class="filename-text unsaved" id="generatedFilename">---</div>
-                            <button type="submit" class="btn-save" id="saveBtn" disabled>
-                                💾 Speichern
-                            </button>
-                        </div>
-                    </div>
+                    <pdff-input-field
+                        name="document_date"
+                        label="Datum"
+                        type="date">
+                    </pdff-input-field>
+
+                    <!-- Status & Save -->
+                    <pdff-status-indicator 
+                        status="not-generatable"
+                        filename="---">
+                        <button 
+                            slot="action" 
+                            class="btn btn-primary" 
+                            id="saveBtn" 
+                            disabled>
+                            💾 Speichern
+                        </button>
+                    </pdff-status-indicator>
                 </div>
 
-                <!-- Navigation -->
-                <div class="navigation-section">
-                    <h3 class="section-title">🧭 Navigation <span id="navPosition" style="opacity: 0.6; font-size: 0.8rem;"></span></h3>
+                <!-- Navigation Section -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        🧭 Navigation 
+                        <span id="navPosition" style="opacity: 0.6; font-size: 0.8rem;"></span>
+                    </h3>
+                    
                     <div class="navigation-buttons">
-                        <button type="button" class="btn-nav" id="btnPrevious">
+                        <button type="button" class="btn" id="btnPrevious" disabled>
                             ← Vorheriges
                         </button>
-                        <button type="button" class="btn-nav" id="btnNext">
+                        <button type="button" class="btn" id="btnNext" disabled>
                             Nächstes →
                         </button>
                     </div>
-                    <div style="display: flex; gap: 1rem; margin-top: 0.75rem; font-family: 'Courier New', monospace; font-size: 0.75rem; color: rgba(255,255,255,0.6);">
-                        <div style="flex: 1; text-align: center;" id="previousUuid">---</div>
-                        <div style="flex: 1; text-align: center;" id="nextUuid">---</div>
+                    
+                    <div class="navigation-info">
+                        <div id="previousInfo">---</div>
+                        <div id="nextInfo">---</div>
                     </div>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 
-    <script>
-        const API_URL = "{{ api_url }}";
-        const DOCUMENT_ID = "{{ document_id }}";
-
-        let currentSavedFilename = null;
-        let currentGeneratedFilename = null;
-        let savedMetadata = {};  // Gespeicherte Metadaten-Werte
-
-        // Status-Typen
-        const STATUS = {
-            UNSAVED: 'unsaved',      // Noch nie gespeichert
-            CHANGED: 'changed',      // Gespeichert, aber geändert
-            SAVED: 'saved',          // Gespeichert und unverändert
-            NOT_GENERATABLE: 'not-generatable'  // Kann nicht generiert werden
-        };
-
-        // Metadaten laden beim Start
-        async function loadDocument() {
-            try {
-                const docId = window.DOCUMENT_ID || DOCUMENT_ID;
-                console.log('Lade Dokument:', docId);
-                
-                const response = await fetch(`${API_URL}/documents/${docId}`);
-                if (!response.ok) throw new Error('Dokument nicht gefunden');
-                
-                const data = await response.json();
-                console.log('Geladene Metadaten:', data.metadata);
-                
-                // PDF laden
-                document.getElementById('pdfViewer').src = `${API_URL}/documents/${docId}/pdf`;
-                
-                // Aktuellen Filename anzeigen
-                document.getElementById('currentFilename').textContent = data.current_filename;
-                document.getElementById('pageTitle').textContent = `${data.current_filename} - PDFF Core`;
-                currentSavedFilename = data.current_filename;
-                
-                // Gespeicherte Metadaten merken
-                savedMetadata = {
-                    correspondent: data.metadata.correspondent || '',
-                    document_type: data.metadata.document_type || '',
-                    customer_id: data.metadata.customer_id || '',
-                    document_number: data.metadata.document_number || '',
-                    document_date: data.metadata.document_date || ''
-                };
-                
-                // WICHTIG: Formular erst leeren, dann befüllen
-                document.getElementById('correspondent').value = '';
-                document.getElementById('document_type').value = '';
-                document.getElementById('customer_id').value = '';
-                document.getElementById('document_number').value = '';
-                document.getElementById('document_date').value = '';
-                
-                // Formular befüllen mit neuen Daten
-                if (data.metadata.correspondent) {
-                    document.getElementById('correspondent').value = data.metadata.correspondent;
-                }
-                if (data.metadata.document_type) {
-                    document.getElementById('document_type').value = data.metadata.document_type;
-                }
-                if (data.metadata.customer_id) {
-                    document.getElementById('customer_id').value = data.metadata.customer_id;
-                }
-                if (data.metadata.document_number) {
-                    document.getElementById('document_number').value = data.metadata.document_number;
-                }
-                if (data.metadata.document_date) {
-                    document.getElementById('document_date').value = data.metadata.document_date;
-                }
-                
-                // Alle Felder als unverändert markieren
-                document.querySelectorAll('.form-group input').forEach(input => {
-                    input.classList.remove('changed');
-                });
-                
-                // Initial Preview
-                updateFilenamePreviewLive();
-                
-            } catch (error) {
-                showError('Fehler beim Laden: ' + error.message);
-            }
-        }
-
-        // Metadaten speichern
-        document.getElementById('metadataForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const docId = window.DOCUMENT_ID || DOCUMENT_ID;
-            console.log('💾 SAVE - Dokument-ID:', docId);
-            
-            const saveBtn = document.getElementById('saveBtn');
-            const originalText = saveBtn.textContent;
-            saveBtn.textContent = '⏳ Speichere...';
-            saveBtn.disabled = true;
-            
-            try {
-                const metadata = {
-                    correspondent: document.getElementById('correspondent').value,
-                    document_type: document.getElementById('document_type').value,
-                    customer_id: document.getElementById('customer_id').value || null,
-                    document_number: document.getElementById('document_number').value || null,
-                    document_date: document.getElementById('document_date').value || null
-                };
-                
-                console.log('💾 Sende Metadaten:', metadata);
-                
-                // 1. Metadaten updaten
-                const updateUrl = `${API_URL}/documents/${docId}`;
-                console.log('💾 PATCH URL:', updateUrl);
-                
-                const updateResponse = await fetch(updateUrl, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(metadata)
-                });
-                
-                if (!updateResponse.ok) {
-                    const error = await updateResponse.json();
-                    console.error('💾 PATCH fehlgeschlagen:', error);
-                    throw new Error('Update fehlgeschlagen');
-                }
-                
-                console.log('💾 PATCH erfolgreich');
-                
-                // 2. Datei generieren
-                const saveUrl = `${API_URL}/documents/${docId}/save`;
-                console.log('💾 POST URL:', saveUrl);
-                
-                const saveResponse = await fetch(saveUrl, {
-                    method: 'POST'
-                });
-                
-                if (!saveResponse.ok) {
-                    const error = await saveResponse.json();
-                    console.error('💾 POST fehlgeschlagen:', error);
-                    throw new Error(error.detail || 'Speichern fehlgeschlagen');
-                }
-                
-                const saveData = await saveResponse.json();
-                console.log('💾 Save erfolgreich:', saveData);
-                
-                // Erfolg: Status aktualisieren
-                currentSavedFilename = saveData.generated_filename;
-                currentGeneratedFilename = saveData.generated_filename;
-                
-                // Gespeicherte Metadaten aktualisieren
-                savedMetadata = {
-                    correspondent: metadata.correspondent,
-                    document_type: metadata.document_type,
-                    customer_id: metadata.customer_id || '',
-                    document_number: metadata.document_number || '',
-                    document_date: metadata.document_date || ''
-                };
-                
-                document.getElementById('currentFilename').textContent = saveData.generated_filename;
-                document.getElementById('pageTitle').textContent = `${saveData.generated_filename} - PDFF Core`;
-                updateStatus(STATUS.SAVED);
-                
-                // Alle Felder als unverändert markieren
-                document.querySelectorAll('.form-group input').forEach(input => {
-                    input.classList.remove('changed');
-                });
-                
-                // Navigation neu laden (da Dokument jetzt processed ist)
-                loadNavigation();
-                
-                saveBtn.textContent = '✓ Gespeichert!';
-                setTimeout(() => {
-                    saveBtn.textContent = originalText;
-                }, 2000);
-                
-            } catch (error) {
-                console.error('💾 Save Error:', error);
-                showError('Fehler: ' + error.message);
-                saveBtn.textContent = originalText;
-            }
-        });
-
-        // Live-Preview beim Tippen
-        let previewTimeout;
-        const formInputs = document.querySelectorAll('#metadataForm input');
-        formInputs.forEach(input => {
-            input.addEventListener('input', () => {
-                clearTimeout(previewTimeout);
-                previewTimeout = setTimeout(updateFilenamePreviewLive, 500);
-            });
-        });
-
-        async function updateFilenamePreviewLive() {
-            const metadata = {
-                correspondent: document.getElementById('correspondent').value,
-                document_type: document.getElementById('document_type').value,
-                customer_id: document.getElementById('customer_id').value || null,
-                document_number: document.getElementById('document_number').value || null,
-                document_date: document.getElementById('document_date').value || null
-            };
-
-            try {
-                const response = await fetch(`${API_URL}/documents/${DOCUMENT_ID}/preview-filename`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(metadata)
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    currentGeneratedFilename = data.preview_filename;
-                    
-                    document.getElementById('generatedFilename').textContent = data.preview_filename;
-                    
-                    // Status ermitteln
-                    let status;
-                    if (!currentSavedFilename || currentSavedFilename === metadata.correspondent) {
-                        // Noch nie gespeichert
-                        status = STATUS.UNSAVED;
-                    } else if (currentGeneratedFilename !== currentSavedFilename) {
-                        // Gespeichert, aber geändert
-                        status = STATUS.CHANGED;
-                    } else {
-                        // Gespeichert und unverändert
-                        status = STATUS.SAVED;
-                    }
-                    
-                    updateStatus(status);
-                    
-                    // Submit-Button enablen/disablen
-                    const saveBtn = document.getElementById('saveBtn');
-                    if (data.is_complete) {
-                        saveBtn.disabled = false;
-                    } else {
-                        saveBtn.disabled = true;
-                    }
-                }
-            } catch (error) {
-                console.error('Preview failed:', error);
-            }
-        }
-
-        function updateStatus(status) {
-            const filenameText = document.getElementById('generatedFilename');
-            const statusBadge = document.getElementById('statusBadge');
-            const statusText = document.getElementById('statusText');
-            
-            // Alle Status-Klassen entfernen
-            filenameText.classList.remove('unsaved', 'changed', 'saved', 'not-generatable');
-            statusBadge.classList.remove('unsaved', 'changed', 'saved', 'not-generatable');
-            
-            // Neue Status-Klasse hinzufügen
-            filenameText.classList.add(status);
-            statusBadge.classList.add(status);
-            
-            // Text aktualisieren
-            const statusTexts = {
-                [STATUS.UNSAVED]: 'Nicht gespeichert',
-                [STATUS.CHANGED]: 'Geändert',
-                [STATUS.SAVED]: 'Gespeichert',
-                [STATUS.NOT_GENERATABLE]: 'Nicht generierbar'
-            };
-            statusText.textContent = statusTexts[status];
-        }
-
-        function showError(message) {
-            const errorBox = document.getElementById('errorBox');
-            errorBox.textContent = message;
-            errorBox.style.display = 'block';
-            setTimeout(() => {
-                errorBox.style.display = 'none';
-            }, 5000);
-        }
-
-        // Beim Laden starten
-        loadDocument();
-
-        let navigationData = null;
-
-        // Navigation laden
-        async function loadNavigation() {
-            try {
-                const docId = window.DOCUMENT_ID || DOCUMENT_ID;
-                console.log('Lade Navigation für:', docId);
-                const response = await fetch(`${API_URL}/documents/${docId}/navigation?filter=unprocessed`);
-                
-                if (!response.ok) {
-                    const error = await response.json();
-                    console.error('Navigation Error:', error);
-                    return;
-                }
-                
-                navigationData = await response.json();
-                console.log('Navigation geladen:', navigationData);
-                
-                updateNavigationUI();
-                
-            } catch (error) {
-                console.error('Navigation laden fehlgeschlagen:', error);
-            }
-        }
-
-        function updateNavigationUI() {
-            if (!navigationData) return;
-            
-            const btnPrevious = document.getElementById('btnPrevious');
-            const btnNext = document.getElementById('btnNext');
-            const previousUuid = document.getElementById('previousUuid');
-            const nextUuid = document.getElementById('nextUuid');
-            
-            // Previous Button & UUID
-            if (navigationData.previous) {
-                btnPrevious.disabled = false;
-                previousUuid.textContent = navigationData.previous.id;
-            } else {
-                btnPrevious.disabled = true;
-                previousUuid.textContent = '---';
-            }
-            
-            // Next Button & UUID
-            if (navigationData.next) {
-                btnNext.disabled = false;
-                nextUuid.textContent = navigationData.next.id;
-            } else {
-                btnNext.disabled = true;
-                nextUuid.textContent = '---';
-            }
-            
-            // Position anzeigen
-            document.getElementById('navPosition').textContent = 
-                `(${navigationData.current_position} von ${navigationData.total_unprocessed})`;
-        }
-
-        // Event-Listener für Navigation-Buttons
+    <!-- Web Components -->
+    <script type="module">
+        // Import base component first
+        import './static/js/components/base-component.js';
+        
+        // Import UI components
+        import './static/js/components/pdff-input-field.js';
+        import './static/js/components/pdff-status-indicator.js';
+        
+        // Import controller
+        import { EditorController } from './static/js/editor-controller.js';
+        
+        // Initialize when DOM is ready
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('btnPrevious').addEventListener('click', () => {
-                if (navigationData && navigationData.previous) {
-                    console.log('Navigate to previous:', navigationData.previous.id);
-                    navigateToDocument(navigationData.previous.id);
-                }
-            });
-
-            document.getElementById('btnNext').addEventListener('click', () => {
-                if (navigationData && navigationData.next) {
-                    console.log('Navigate to next:', navigationData.next.id);
-                    navigateToDocument(navigationData.next.id);
-                }
-            });
+            const controller = new EditorController(
+                "{{ api_url }}", 
+                "{{ document_id }}"
+            );
+            controller.init();
         });
-
-        // Navigation zu anderem Dokument OHNE Page-Reload
-        function navigateToDocument(documentId) {
-            // URL aktualisieren (ohne Reload)
-            const newUrl = `/editor?document_id=${documentId}`;
-            window.history.pushState({documentId: documentId}, '', newUrl);
-            
-            // DOCUMENT_ID global updaten
-            window.DOCUMENT_ID = documentId;
-            
-            // Formular auf Default zurücksetzen
-            resetForm();
-            
-            // Alles neu laden
-            loadDocument();
-            loadNavigation();
-        }
-
-        // Formular komplett zurücksetzen
-        function resetForm() {
-            // Textfelder leeren
-            document.getElementById('correspondent').value = '';
-            document.getElementById('document_type').value = '';
-            document.getElementById('customer_id').value = '';
-            document.getElementById('document_number').value = '';
-            document.getElementById('document_date').value = '';
-            
-            // Alle changed-Markierungen entfernen
-            document.querySelectorAll('.form-group input').forEach(input => {
-                input.classList.remove('changed');
-            });
-            
-            // Filename auf Default
-            document.getElementById('generatedFilename').textContent = '---';
-            currentGeneratedFilename = null;
-            
-            // Status auf NOT_GENERATABLE
-            updateStatus(STATUS.NOT_GENERATABLE);
-        }
-
-        // Browser Back/Forward Button Support
-        window.addEventListener('popstate', (event) => {
-            if (event.state && event.state.documentId) {
-                window.DOCUMENT_ID = event.state.documentId;
-                loadDocument();
-                loadNavigation();
-            }
-        });
-
-        // DOCUMENT_ID global verfügbar machen
-        window.DOCUMENT_ID = DOCUMENT_ID;
-
-        // Navigation auch laden
-        loadNavigation();
     </script>
 </body>
 </html>

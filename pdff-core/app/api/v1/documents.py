@@ -18,6 +18,7 @@ class MetadataResponse(BaseModel):
     """Metadaten-Response für Frontend"""
     document_type: Optional[str] = None
     correspondent: Optional[str] = None
+    topic: Optional[str] = None
     customer_id: Optional[str] = None
     document_number: Optional[str] = None
     document_date: Optional[date] = None
@@ -36,6 +37,7 @@ class MetadataUpdateRequest(BaseModel):
     """Request für Metadaten-Update"""
     document_type: Optional[str] = None
     correspondent: Optional[str] = None
+    topic: Optional[str] = None
     customer_id: Optional[str] = None
     document_number: Optional[str] = None
     document_date: Optional[date] = None
@@ -77,6 +79,7 @@ def get_document_metadata(
         metadata=MetadataResponse(
             document_type=doc.document_type,
             correspondent=doc.correspondent,
+            topic=doc.topic,
             customer_id=doc.customer_id,
             document_number=doc.document_number,
             document_date=doc.document_date
@@ -140,6 +143,7 @@ def update_document_metadata(
         metadata=MetadataResponse(
             document_type=doc.document_type,
             correspondent=doc.correspondent,
+            topic=doc.topic,
             customer_id=doc.customer_id,
             document_number=doc.document_number,
             document_date=doc.document_date
@@ -199,6 +203,7 @@ def preview_filename(
     preview_filename = Document.build_filename(
         document_type=metadata.document_type or doc.document_type,
         correspondent=metadata.correspondent or doc.correspondent,
+        topic=metadata.topic or doc.topic,
         customer_id=metadata.customer_id or doc.customer_id,
         document_number=metadata.document_number or doc.document_number,
         document_date=metadata.document_date or doc.document_date,
@@ -240,43 +245,34 @@ def get_navigation(
     """
     Navigiere zu vorherigem/nächstem Dokument.
     Filter: 
-    - 'unprocessed': Dokumente ohne vollständige Metadaten (kein document_type oder correspondent)
+    - 'unprocessed': Dokumente ohne vollständige Metadaten
     - 'unsaved': Dokumente die noch nie gespeichert wurden
     - 'all': Alle Dokumente
-    
-    WICHTIG: Das aktuelle Dokument ist IMMER in der Liste, auch wenn es Filter-Kriterien nicht erfüllt.
     """
     current_doc = collection.get(document_id)
     
     if not current_doc:
         raise HTTPException(status_code=404, detail="Document not found")
     
-    # Alle Dokumente holen und filtern
     all_docs = collection.all()
     
     if filter == "unprocessed":
-        # Dokumente ohne vollständige Metadaten
         filtered_docs = [
             doc for doc in all_docs 
             if not doc.document_type or not doc.correspondent
         ]
     elif filter == "unsaved":
-        # Nur noch nie gespeicherte Dokumente
         filtered_docs = [doc for doc in all_docs if not doc.is_saved]
     else:
         filtered_docs = all_docs
     
-    # WICHTIG: Aktuelles Dokument MUSS immer in der Liste sein
     if current_doc not in filtered_docs:
         filtered_docs.append(current_doc)
     
-    # Sortieren nach original_filename für konsistente Reihenfolge
     filtered_docs.sort(key=lambda d: d.original_filename)
     
-    # Current Position finden (sollte jetzt IMMER funktionieren)
     current_index = next(i for i, doc in enumerate(filtered_docs) if doc.id == document_id)
     
-    # Previous & Next ermitteln
     previous_doc = filtered_docs[current_index - 1] if current_index > 0 else None
     next_doc = filtered_docs[current_index + 1] if current_index < len(filtered_docs) - 1 else None
     
@@ -294,5 +290,5 @@ def get_navigation(
             original_filename=previous_doc.original_filename
         ) if previous_doc else None,
         total_unprocessed=len(filtered_docs),
-        current_position=current_index + 1  # 1-based für User
+        current_position=current_index + 1
     )
