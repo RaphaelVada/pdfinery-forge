@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Metadaten bearbeiten - PDFF Core</title>
+    <title id="pageTitle">PDF Metadaten bearbeiten - PDFF Core</title>
     <style>
         * {
             margin: 0;
@@ -12,7 +12,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #0d4d4d 0%, #1a6b6b 50%, #267373 100%);
             height: 100vh;
             display: flex;
@@ -26,12 +26,6 @@
             color: white;
             padding: 1rem 2rem;
             box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
-        }
-
-        header h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
 
         .container {
@@ -51,12 +45,10 @@
 
         .pdf-embed {
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
             width: 100%;
             height: 100%;
             border-radius: 12px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .metadata-panel {
@@ -68,36 +60,208 @@
             flex-direction: column;
         }
 
-        .filename-header {
-            padding: 1.5rem 2rem;
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(5, 150, 105, 0.4) 100%);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-        }
-
-        .filename-header h3 {
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .filename-header .filename {
-            font-family: 'Courier New', monospace;
-            font-size: 1rem;
-            color: #ffffff;
-            word-break: break-all;
-            font-weight: 600;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
         .metadata-form {
             flex: 1;
             padding: 2rem;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .form-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filename-status {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .status-badge.unsaved {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+
+        .status-badge.changed {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
+        .status-badge.saved {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .status-badge.not-generatable {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-badge.unsaved .status-dot {
+            background: #fbbf24;
+        }
+
+        .status-badge.changed .status-dot {
+            background: #3b82f6;
+        }
+
+        .status-badge.saved .status-dot {
+            background: #10b981;
+        }
+
+        .status-badge.not-generatable .status-dot {
+            background: #ef4444;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .filename-display {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .filename-text {
+            flex: 1;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            color: #ffffff;
+            word-break: break-all;
+            padding: 0.75rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .filename-text.unsaved {
+            border-color: rgba(251, 191, 36, 0.5);
+            background: rgba(251, 191, 36, 0.1);
+        }
+
+        .filename-text.changed {
+            border-color: rgba(59, 130, 246, 0.5);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .filename-text.saved {
+            border-color: rgba(16, 185, 129, 0.5);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .filename-text.not-generatable {
+            border-color: rgba(239, 68, 68, 0.5);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .btn-save {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.8) 0%, rgba(5, 150, 105, 0.9) 100%);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn-save:hover:not(:disabled) {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 1) 100%);
+            transform: translateY(-2px);
+        }
+
+        .btn-save:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-save.up-to-date {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: rgba(100, 100, 100, 0.5);
+        }
+
+        .navigation-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .navigation-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-nav {
+            flex: 1;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-nav:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .btn-nav:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
         }
 
         .form-group {
@@ -109,115 +273,41 @@
             font-weight: 500;
             color: rgba(255, 255, 255, 0.9);
             margin-bottom: 0.5rem;
-            font-size: 0.9rem;
         }
 
-        .input-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            align-items: start;
-        }
-
-        .input-col input {
+        .form-group input {
             width: 100%;
             padding: 0.75rem;
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 8px;
-            font-size: 0.95rem;
             color: white;
+            font-size: 0.95rem;
             transition: all 0.3s ease;
         }
 
-        .input-col input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .input-col input:focus {
+        .form-group input:focus {
             outline: none;
             background: rgba(255, 255, 255, 0.15);
             border-color: rgba(16, 185, 129, 0.6);
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
         }
 
-        .input-col small {
-            display: block;
-            margin-top: 0.25rem;
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        .autocomplete-container {
-            position: relative;
-        }
-
-        .autocomplete-list {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 1px solid #ddd;
-            border-top: none;
-            border-radius: 0 0 4px 4px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            display: none;
-        }
-
-        .autocomplete-list.active {
-            display: block;
-        }
-
-        .autocomplete-item {
-            padding: 0.75rem;
-            cursor: pointer;
-            border-bottom: 1px solid #f0f0f0;
-            transition: background 0.15s;
-        }
-
-        .autocomplete-item:hover,
-        .autocomplete-item.selected {
-            background: #f0f8ff;
-        }
-
-        .autocomplete-item:last-child {
-            border-bottom: none;
-        }
-
-        .sanitized-output {
-            padding: 0.75rem;
-            background: #f0f8ff;
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.85rem;
-            color: #2c3e50;
-            word-break: break-all;
-            min-height: 2.5rem;
-            display: flex;
-            align-items: center;
-        }
-
-        .filename-preview {
-            display: none;
+        .form-group input.changed {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
         .form-actions {
             padding: 1.5rem 2rem;
             border-top: 1px solid rgba(255, 255, 255, 0.15);
             background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
         }
 
         .btn-submit {
             width: 100%;
             padding: 0.875rem;
             background: linear-gradient(135deg, rgba(16, 185, 129, 0.8) 0%, rgba(5, 150, 105, 0.9) 100%);
-            backdrop-filter: blur(10px);
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 8px;
@@ -225,366 +315,505 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
         }
 
         .btn-submit:hover {
             background: linear-gradient(135deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 1) 100%);
-            box-shadow: 0 6px 24px rgba(16, 185, 129, 0.4);
             transform: translateY(-2px);
         }
 
-        .btn-submit:active {
-            transform: translateY(0);
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
         }
 
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-            }
-
-            .pdf-viewer {
-                height: 40vh;
-            }
-
-            .metadata-panel {
-                width: 100%;
-                border-left: none;
-                border-top: 1px solid #ddd;
-            }
+        .error {
+            color: #ff6b6b;
+            padding: 1rem;
+            background: rgba(255, 107, 107, 0.1);
+            border-radius: 8px;
+            margin-bottom: 1rem;
         }
     </style>
 </head>
 <body>
     <header>
         <h1>📄 PDF Metadaten bearbeiten</h1>
+        <div class="current-filename" id="currentFilename">Lade...</div>
     </header>
 
     <div class="container">
         <div class="pdf-viewer">
-            <iframe 
-                class="pdf-embed"
-                src="https://docs.google.com/viewer?url=https://www.uni-regensburg.de/assets/physik/fakultaet/IT/Tutorials-Installation-Programming-Environment/Programmieren_in_Python.pdf&embedded=true"
-            ></iframe>
+            <iframe class="pdf-embed" id="pdfViewer"></iframe>
         </div>
 
         <div class="metadata-panel">
-            <div class="filename-header">
-                <h3>📄 Dateiname:</h3>
-                <div class="filename" id="filenamePreview">---</div>
-            </div>
-
             <form class="metadata-form" id="metadataForm">
-                <div class="form-group">
-                    <label for="correspondent">Korrespondenzpartner Kurzname</label>
-                    <div class="input-row">
-                        <div class="input-col autocomplete-container">
-                            <input type="text" id="correspondent" name="correspondent" placeholder="z.B. sparkassedueren" autocomplete="off">
-                            <div class="autocomplete-list" id="correspondent-list"></div>
-                            <small>Eingabe</small>
+                <div id="errorBox" class="error" style="display: none;"></div>
+
+                <!-- Eingabefelder + Generierter Filename -->
+                <div class="form-section">
+                    <h3 class="section-title">📝 Metadaten bearbeiten</h3>
+                    
+                    <div class="form-group">
+                        <label for="correspondent">Korrespondent</label>
+                        <input type="text" id="correspondent" name="correspondent" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="document_type">Dokumenttyp</label>
+                        <input type="text" id="document_type" name="document_type" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customer_id">Kundennummer (optional)</label>
+                        <input type="text" id="customer_id" name="customer_id">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="document_number">Dokumentnummer (optional)</label>
+                        <input type="text" id="document_number" name="document_number">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="document_date">Datum</label>
+                        <input type="date" id="document_date" name="document_date">
+                    </div>
+
+                    <div class="filename-status">
+                        <div class="status-indicator">
+                            <div class="status-badge unsaved" id="statusBadge">
+                                <span class="status-dot"></span>
+                                <span id="statusText">Nicht gespeichert</span>
+                            </div>
                         </div>
-                        <div class="input-col">
-                            <div class="sanitized-output" id="correspondent-sanitized">---</div>
-                            <small>Sanitized</small>
+                        <div class="filename-display">
+                            <div class="filename-text unsaved" id="generatedFilename">---</div>
+                            <button type="submit" class="btn-save" id="saveBtn" disabled>
+                                💾 Speichern
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="customerId">Kundennummer (optional)</label>
-                    <div class="input-row">
-                        <div class="input-col">
-                            <input type="text" id="customerId" name="customerId" placeholder="z.B. K-12345">
-                            <small>Eingabe</small>
-                        </div>
-                        <div class="input-col">
-                            <div class="sanitized-output" id="customerId-sanitized">---</div>
-                            <small>Sanitized</small>
-                        </div>
+                <!-- Navigation -->
+                <div class="navigation-section">
+                    <h3 class="section-title">🧭 Navigation <span id="navPosition" style="opacity: 0.6; font-size: 0.8rem;"></span></h3>
+                    <div class="navigation-buttons">
+                        <button type="button" class="btn-nav" id="btnPrevious">
+                            ← Vorheriges
+                        </button>
+                        <button type="button" class="btn-nav" id="btnNext">
+                            Nächstes →
+                        </button>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="contractNumber">Vertragsnummer (optional)</label>
-                    <div class="input-row">
-                        <div class="input-col">
-                            <input type="text" id="contractNumber" name="contractNumber" placeholder="z.B. V-2024-001">
-                            <small>Eingabe</small>
-                        </div>
-                        <div class="input-col">
-                            <div class="sanitized-output" id="contractNumber-sanitized">---</div>
-                            <small>Sanitized</small>
-                        </div>
+                    <div style="display: flex; gap: 1rem; margin-top: 0.75rem; font-family: 'Courier New', monospace; font-size: 0.75rem; color: rgba(255,255,255,0.6);">
+                        <div style="flex: 1; text-align: center;" id="previousUuid">---</div>
+                        <div style="flex: 1; text-align: center;" id="nextUuid">---</div>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="documentType">Dokumenttyp</label>
-                    <div class="input-row">
-                        <div class="input-col autocomplete-container">
-                            <input type="text" id="documentType" name="documentType" placeholder="z.B. rechnung, vertrag, bescheinigung" autocomplete="off">
-                            <div class="autocomplete-list" id="documentType-list"></div>
-                            <small>Eingabe</small>
-                        </div>
-                        <div class="input-col">
-                            <div class="sanitized-output" id="documentType-sanitized">---</div>
-                            <small>Sanitized</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="documentDate">Datum Schreiben</label>
-                    <div class="input-row">
-                        <div class="input-col">
-                            <input type="date" id="documentDate" name="documentDate">
-                            <small>Eingabe</small>
-                        </div>
-                        <div class="input-col">
-                            <div class="sanitized-output" id="documentDate-sanitized">---</div>
-                            <small>Sanitized</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="area">Bereich (optional)</label>
-                    <div class="input-row">
-                        <div class="input-col autocomplete-container">
-                            <input type="text" id="area" name="area" placeholder="z.B. steuer, kfzversicherung" autocomplete="off">
-                            <div class="autocomplete-list" id="area-list"></div>
-                            <small>Eingabe</small>
-                        </div>
-                        <div class="input-col">
-                            <div class="sanitized-output" id="area-sanitized">---</div>
-                            <small>Sanitized</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="referenceNumber">Rechnungsnummer/Aktenzeichen/Vorgangsnummer (optional)</label>
-                    <div class="input-row">
-                        <div class="input-col">
-                            <input type="text" id="referenceNumber" name="referenceNumber" placeholder="z.B. RE-2024-001">
-                            <small>Eingabe</small>
-                        </div>
-                        <div class="input-col">
-                            <div class="sanitized-output" id="referenceNumber-sanitized">---</div>
-                            <small>Sanitized</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="filename-preview">
-                    <h3>📄 Vorschau Dateiname:</h3>
-                    <div class="filename" id="filenamePreview">---</div>
                 </div>
             </form>
-
-            <div class="form-actions">
-                <button type="submit" form="metadataForm" class="btn-submit">
-                    Metadaten speichern
-                </button>
-            </div>
         </div>
     </div>
 
     <script>
-        // Autocomplete data from your rules
-        const correspondents = [
-            'erkensbestattung', 'schuhcenter', 'gez', 'eventim', 'onede', 'porta',
-            'zahnarztbehets', 'kinderarztbuntepraxis', 'dlazbestattungfactoring',
-            'ericsalmon', 'sparkassedueren', 'wzvneffeltal', 'buhldata', 'aok',
-            'elster', 'charlyswerkstatt', 'landhuuslaurenz', 'allianz', 'congstar',
-            'dnconnect', 'anwaltgassmann', 'duerenamtsgericht', 'verdi', 'westnetz',
-            'dak', 'gwq', 'enpal', 'awo', 'noervenichgemeinde', 'rentenversicherung',
-            'huk', 'dekra', 'atsc', 'duerenstadt', 'duerenkreis', 'duerenfinanzamt',
-            'eon', 'sanitaeryilmaz', 'argenturfuerarbeit', 'schuelergarten',
-            'regioentsorgung', 'schornsteinfegerschneider'
-        ];
+        const API_URL = "{{ api_url }}";
+        const DOCUMENT_ID = "{{ document_id }}";
 
-        const documentTypes = [
-            'jobprofil', 'stellenbeschreibung', 'au', 'rechnung', 'lizenz', 'schreiben',
-            'information', 'zahlungsbeleg', 'mahnung', 'zugangsdaten', 'vertrag',
-            'zertifikat', 'urkunde', 'abrechnung', 'lieferschein', 'bescheinigung',
-            'kontoauszug', 'erklärung', 'angebot', 'antrag', 'auftrag'
-        ];
+        let currentSavedFilename = null;
+        let currentGeneratedFilename = null;
+        let savedMetadata = {};  // Gespeicherte Metadaten-Werte
 
-        const areas = [
-            'tuev', 'au', 'hu', 'sozialversicherung', 'lohnsteuer', 'steuer',
-            'steuernummer', 'kindergeld', 'gehalt', 'gebuehren', 'darlehen',
-            'grundbesitzabgaben', 'elterngeld', 'gebaeudeversicherung', 'kfzversicherung',
-            'haftpflichtversicherung', 'einkommen'
-        ];
+        // Status-Typen
+        const STATUS = {
+            UNSAVED: 'unsaved',      // Noch nie gespeichert
+            CHANGED: 'changed',      // Gespeichert, aber geändert
+            SAVED: 'saved',          // Gespeichert und unverändert
+            NOT_GENERATABLE: 'not-generatable'  // Kann nicht generiert werden
+        };
 
-        // Autocomplete functionality
-        function setupAutocomplete(inputId, suggestions) {
-            const input = document.getElementById(inputId);
-            const list = document.getElementById(inputId + '-list');
-            let selectedIndex = -1;
-
-            input.addEventListener('input', function() {
-                const value = this.value.toLowerCase();
-                list.innerHTML = '';
-                selectedIndex = -1;
-
-                if (!value) {
-                    list.classList.remove('active');
-                    return;
-                }
-
-                const filtered = suggestions.filter(s => s.toLowerCase().includes(value));
+        // Metadaten laden beim Start
+        async function loadDocument() {
+            try {
+                const docId = window.DOCUMENT_ID || DOCUMENT_ID;
+                console.log('Lade Dokument:', docId);
                 
-                if (filtered.length === 0) {
-                    list.classList.remove('active');
-                    return;
-                }
-
-                filtered.forEach((item, index) => {
-                    const div = document.createElement('div');
-                    div.className = 'autocomplete-item';
-                    div.textContent = item;
-                    div.addEventListener('click', () => {
-                        input.value = item;
-                        list.classList.remove('active');
-                        updateSanitizedOutputs();
-                    });
-                    list.appendChild(div);
-                });
-
-                list.classList.add('active');
-            });
-
-            input.addEventListener('keydown', function(e) {
-                const items = list.querySelectorAll('.autocomplete-item');
+                const response = await fetch(`${API_URL}/documents/${docId}`);
+                if (!response.ok) throw new Error('Dokument nicht gefunden');
                 
-                if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
-                    updateSelection(items);
-                } else if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    selectedIndex = Math.max(selectedIndex - 1, 0);
-                    updateSelection(items);
-                } else if (e.key === 'Enter' && selectedIndex >= 0) {
-                    e.preventDefault();
-                    items[selectedIndex].click();
-                } else if (e.key === 'Escape') {
-                    list.classList.remove('active');
+                const data = await response.json();
+                console.log('Geladene Metadaten:', data.metadata);
+                
+                // PDF laden
+                document.getElementById('pdfViewer').src = `${API_URL}/documents/${docId}/pdf`;
+                
+                // Aktuellen Filename anzeigen
+                document.getElementById('currentFilename').textContent = data.current_filename;
+                document.getElementById('pageTitle').textContent = `${data.current_filename} - PDFF Core`;
+                currentSavedFilename = data.current_filename;
+                
+                // Gespeicherte Metadaten merken
+                savedMetadata = {
+                    correspondent: data.metadata.correspondent || '',
+                    document_type: data.metadata.document_type || '',
+                    customer_id: data.metadata.customer_id || '',
+                    document_number: data.metadata.document_number || '',
+                    document_date: data.metadata.document_date || ''
+                };
+                
+                // WICHTIG: Formular erst leeren, dann befüllen
+                document.getElementById('correspondent').value = '';
+                document.getElementById('document_type').value = '';
+                document.getElementById('customer_id').value = '';
+                document.getElementById('document_number').value = '';
+                document.getElementById('document_date').value = '';
+                
+                // Formular befüllen mit neuen Daten
+                if (data.metadata.correspondent) {
+                    document.getElementById('correspondent').value = data.metadata.correspondent;
                 }
-            });
-
-            function updateSelection(items) {
-                items.forEach((item, index) => {
-                    item.classList.toggle('selected', index === selectedIndex);
+                if (data.metadata.document_type) {
+                    document.getElementById('document_type').value = data.metadata.document_type;
+                }
+                if (data.metadata.customer_id) {
+                    document.getElementById('customer_id').value = data.metadata.customer_id;
+                }
+                if (data.metadata.document_number) {
+                    document.getElementById('document_number').value = data.metadata.document_number;
+                }
+                if (data.metadata.document_date) {
+                    document.getElementById('document_date').value = data.metadata.document_date;
+                }
+                
+                // Alle Felder als unverändert markieren
+                document.querySelectorAll('.form-group input').forEach(input => {
+                    input.classList.remove('changed');
                 });
-                if (items[selectedIndex]) {
-                    items[selectedIndex].scrollIntoView({ block: 'nearest' });
-                }
+                
+                // Initial Preview
+                updateFilenamePreviewLive();
+                
+            } catch (error) {
+                showError('Fehler beim Laden: ' + error.message);
             }
-
-            // Close on click outside
-            document.addEventListener('click', function(e) {
-                if (!input.contains(e.target) && !list.contains(e.target)) {
-                    list.classList.remove('active');
-                }
-            });
         }
 
-        // Initialize autocomplete
-        setupAutocomplete('correspondent', correspondents);
-        setupAutocomplete('documentType', documentTypes);
-        setupAutocomplete('area', areas);
-
-        // Sanitization functions
-        function toKebabCase(text) {
-            if (!text) return '';
-            return text
-                .toLowerCase()
-                .replace(/[^a-z0-9]+/g, '-')
-                .replace(/^-+|-+$/g, '');
-        }
-
-        function sanitizeReferenceNumber(text) {
-            if (!text) return '';
-            return text.replace(/[^a-zA-Z0-9]/g, '');
-        }
-
-        function formatDate(dateStr) {
-            if (!dateStr) return '';
-            return dateStr; // Already in YYYY-MM-DD format from input type="date"
-        }
-
-        function updateSanitizedOutputs() {
-            const correspondent = document.getElementById('correspondent').value;
-            const customerId = document.getElementById('customerId').value;
-            const contractNumber = document.getElementById('contractNumber').value;
-            const documentType = document.getElementById('documentType').value;
-            const documentDate = document.getElementById('documentDate').value;
-            const area = document.getElementById('area').value;
-            const referenceNumber = document.getElementById('referenceNumber').value;
-
-            // Update sanitized previews
-            document.getElementById('correspondent-sanitized').textContent = 
-                toKebabCase(correspondent) || '---';
-            document.getElementById('customerId-sanitized').textContent = 
-                sanitizeReferenceNumber(customerId) || '---';
-            document.getElementById('contractNumber-sanitized').textContent = 
-                sanitizeReferenceNumber(contractNumber) || '---';
-            document.getElementById('documentType-sanitized').textContent = 
-                toKebabCase(documentType) || '---';
-            document.getElementById('documentDate-sanitized').textContent = 
-                formatDate(documentDate) || '---';
-            document.getElementById('area-sanitized').textContent = 
-                toKebabCase(area) || '---';
-            document.getElementById('referenceNumber-sanitized').textContent = 
-                sanitizeReferenceNumber(referenceNumber) || '---';
-
-            // Build filename
-            const parts = [];
-            
-            if (correspondent) parts.push(toKebabCase(correspondent));
-            if (customerId) parts.push(sanitizeReferenceNumber(customerId));
-            if (contractNumber) parts.push(sanitizeReferenceNumber(contractNumber));
-            if (documentType) parts.push(toKebabCase(documentType));
-            if (documentDate) parts.push(formatDate(documentDate));
-            if (area) parts.push(toKebabCase(area));
-            if (referenceNumber) parts.push(sanitizeReferenceNumber(referenceNumber));
-
-            const filename = parts.length > 0 ? parts.join('_') + '.pdf' : '---';
-            document.getElementById('filenamePreview').textContent = filename;
-        }
-
-        // Add event listeners to all inputs
-        const inputs = document.querySelectorAll('#metadataForm input');
-        inputs.forEach(input => {
-            input.addEventListener('input', updateSanitizedOutputs);
-        });
-
-        document.getElementById('metadataForm').addEventListener('submit', function(e) {
+        // Metadaten speichern
+        document.getElementById('metadataForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const filename = document.getElementById('filenamePreview').textContent;
-            const formData = {
-                correspondent: document.getElementById('correspondent').value,
-                customerId: document.getElementById('customerId').value,
-                contractNumber: document.getElementById('contractNumber').value,
-                documentType: document.getElementById('documentType').value,
-                documentDate: document.getElementById('documentDate').value,
-                area: document.getElementById('area').value,
-                referenceNumber: document.getElementById('referenceNumber').value,
-                generatedFilename: filename
-            };
-
-            console.log('Metadaten:', formData);
+            const docId = window.DOCUMENT_ID || DOCUMENT_ID;
+            console.log('💾 SAVE - Dokument-ID:', docId);
             
-            // Hier später API-Call einfügen
-            alert('Metadaten würden jetzt gespeichert werden:\n\nDateiname: ' + filename + '\n\n' + JSON.stringify(formData, null, 2));
+            const saveBtn = document.getElementById('saveBtn');
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = '⏳ Speichere...';
+            saveBtn.disabled = true;
+            
+            try {
+                const metadata = {
+                    correspondent: document.getElementById('correspondent').value,
+                    document_type: document.getElementById('document_type').value,
+                    customer_id: document.getElementById('customer_id').value || null,
+                    document_number: document.getElementById('document_number').value || null,
+                    document_date: document.getElementById('document_date').value || null
+                };
+                
+                console.log('💾 Sende Metadaten:', metadata);
+                
+                // 1. Metadaten updaten
+                const updateUrl = `${API_URL}/documents/${docId}`;
+                console.log('💾 PATCH URL:', updateUrl);
+                
+                const updateResponse = await fetch(updateUrl, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(metadata)
+                });
+                
+                if (!updateResponse.ok) {
+                    const error = await updateResponse.json();
+                    console.error('💾 PATCH fehlgeschlagen:', error);
+                    throw new Error('Update fehlgeschlagen');
+                }
+                
+                console.log('💾 PATCH erfolgreich');
+                
+                // 2. Datei generieren
+                const saveUrl = `${API_URL}/documents/${docId}/save`;
+                console.log('💾 POST URL:', saveUrl);
+                
+                const saveResponse = await fetch(saveUrl, {
+                    method: 'POST'
+                });
+                
+                if (!saveResponse.ok) {
+                    const error = await saveResponse.json();
+                    console.error('💾 POST fehlgeschlagen:', error);
+                    throw new Error(error.detail || 'Speichern fehlgeschlagen');
+                }
+                
+                const saveData = await saveResponse.json();
+                console.log('💾 Save erfolgreich:', saveData);
+                
+                // Erfolg: Status aktualisieren
+                currentSavedFilename = saveData.generated_filename;
+                currentGeneratedFilename = saveData.generated_filename;
+                
+                // Gespeicherte Metadaten aktualisieren
+                savedMetadata = {
+                    correspondent: metadata.correspondent,
+                    document_type: metadata.document_type,
+                    customer_id: metadata.customer_id || '',
+                    document_number: metadata.document_number || '',
+                    document_date: metadata.document_date || ''
+                };
+                
+                document.getElementById('currentFilename').textContent = saveData.generated_filename;
+                document.getElementById('pageTitle').textContent = `${saveData.generated_filename} - PDFF Core`;
+                updateStatus(STATUS.SAVED);
+                
+                // Alle Felder als unverändert markieren
+                document.querySelectorAll('.form-group input').forEach(input => {
+                    input.classList.remove('changed');
+                });
+                
+                // Navigation neu laden (da Dokument jetzt processed ist)
+                loadNavigation();
+                
+                saveBtn.textContent = '✓ Gespeichert!';
+                setTimeout(() => {
+                    saveBtn.textContent = originalText;
+                }, 2000);
+                
+            } catch (error) {
+                console.error('💾 Save Error:', error);
+                showError('Fehler: ' + error.message);
+                saveBtn.textContent = originalText;
+            }
         });
 
-        // Initial update
-        updateSanitizedOutputs();
+        // Live-Preview beim Tippen
+        let previewTimeout;
+        const formInputs = document.querySelectorAll('#metadataForm input');
+        formInputs.forEach(input => {
+            input.addEventListener('input', () => {
+                clearTimeout(previewTimeout);
+                previewTimeout = setTimeout(updateFilenamePreviewLive, 500);
+            });
+        });
+
+        async function updateFilenamePreviewLive() {
+            const metadata = {
+                correspondent: document.getElementById('correspondent').value,
+                document_type: document.getElementById('document_type').value,
+                customer_id: document.getElementById('customer_id').value || null,
+                document_number: document.getElementById('document_number').value || null,
+                document_date: document.getElementById('document_date').value || null
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/documents/${DOCUMENT_ID}/preview-filename`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(metadata)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentGeneratedFilename = data.preview_filename;
+                    
+                    document.getElementById('generatedFilename').textContent = data.preview_filename;
+                    
+                    // Status ermitteln
+                    let status;
+                    if (!currentSavedFilename || currentSavedFilename === metadata.correspondent) {
+                        // Noch nie gespeichert
+                        status = STATUS.UNSAVED;
+                    } else if (currentGeneratedFilename !== currentSavedFilename) {
+                        // Gespeichert, aber geändert
+                        status = STATUS.CHANGED;
+                    } else {
+                        // Gespeichert und unverändert
+                        status = STATUS.SAVED;
+                    }
+                    
+                    updateStatus(status);
+                    
+                    // Submit-Button enablen/disablen
+                    const saveBtn = document.getElementById('saveBtn');
+                    if (data.is_complete) {
+                        saveBtn.disabled = false;
+                    } else {
+                        saveBtn.disabled = true;
+                    }
+                }
+            } catch (error) {
+                console.error('Preview failed:', error);
+            }
+        }
+
+        function updateStatus(status) {
+            const filenameText = document.getElementById('generatedFilename');
+            const statusBadge = document.getElementById('statusBadge');
+            const statusText = document.getElementById('statusText');
+            
+            // Alle Status-Klassen entfernen
+            filenameText.classList.remove('unsaved', 'changed', 'saved', 'not-generatable');
+            statusBadge.classList.remove('unsaved', 'changed', 'saved', 'not-generatable');
+            
+            // Neue Status-Klasse hinzufügen
+            filenameText.classList.add(status);
+            statusBadge.classList.add(status);
+            
+            // Text aktualisieren
+            const statusTexts = {
+                [STATUS.UNSAVED]: 'Nicht gespeichert',
+                [STATUS.CHANGED]: 'Geändert',
+                [STATUS.SAVED]: 'Gespeichert',
+                [STATUS.NOT_GENERATABLE]: 'Nicht generierbar'
+            };
+            statusText.textContent = statusTexts[status];
+        }
+
+        function showError(message) {
+            const errorBox = document.getElementById('errorBox');
+            errorBox.textContent = message;
+            errorBox.style.display = 'block';
+            setTimeout(() => {
+                errorBox.style.display = 'none';
+            }, 5000);
+        }
+
+        // Beim Laden starten
+        loadDocument();
+
+        let navigationData = null;
+
+        // Navigation laden
+        async function loadNavigation() {
+            try {
+                const docId = window.DOCUMENT_ID || DOCUMENT_ID;
+                console.log('Lade Navigation für:', docId);
+                const response = await fetch(`${API_URL}/documents/${docId}/navigation?filter=unprocessed`);
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    console.error('Navigation Error:', error);
+                    return;
+                }
+                
+                navigationData = await response.json();
+                console.log('Navigation geladen:', navigationData);
+                
+                updateNavigationUI();
+                
+            } catch (error) {
+                console.error('Navigation laden fehlgeschlagen:', error);
+            }
+        }
+
+        function updateNavigationUI() {
+            if (!navigationData) return;
+            
+            const btnPrevious = document.getElementById('btnPrevious');
+            const btnNext = document.getElementById('btnNext');
+            const previousUuid = document.getElementById('previousUuid');
+            const nextUuid = document.getElementById('nextUuid');
+            
+            // Previous Button & UUID
+            if (navigationData.previous) {
+                btnPrevious.disabled = false;
+                previousUuid.textContent = navigationData.previous.id;
+            } else {
+                btnPrevious.disabled = true;
+                previousUuid.textContent = '---';
+            }
+            
+            // Next Button & UUID
+            if (navigationData.next) {
+                btnNext.disabled = false;
+                nextUuid.textContent = navigationData.next.id;
+            } else {
+                btnNext.disabled = true;
+                nextUuid.textContent = '---';
+            }
+            
+            // Position anzeigen
+            document.getElementById('navPosition').textContent = 
+                `(${navigationData.current_position} von ${navigationData.total_unprocessed})`;
+        }
+
+        // Event-Listener für Navigation-Buttons
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('btnPrevious').addEventListener('click', () => {
+                if (navigationData && navigationData.previous) {
+                    console.log('Navigate to previous:', navigationData.previous.id);
+                    navigateToDocument(navigationData.previous.id);
+                }
+            });
+
+            document.getElementById('btnNext').addEventListener('click', () => {
+                if (navigationData && navigationData.next) {
+                    console.log('Navigate to next:', navigationData.next.id);
+                    navigateToDocument(navigationData.next.id);
+                }
+            });
+        });
+
+        // Navigation zu anderem Dokument OHNE Page-Reload
+        function navigateToDocument(documentId) {
+            // URL aktualisieren (ohne Reload)
+            const newUrl = `/editor?document_id=${documentId}`;
+            window.history.pushState({documentId: documentId}, '', newUrl);
+            
+            // DOCUMENT_ID global updaten
+            window.DOCUMENT_ID = documentId;
+            
+            // Formular auf Default zurücksetzen
+            resetForm();
+            
+            // Alles neu laden
+            loadDocument();
+            loadNavigation();
+        }
+
+        // Formular komplett zurücksetzen
+        function resetForm() {
+            // Textfelder leeren
+            document.getElementById('correspondent').value = '';
+            document.getElementById('document_type').value = '';
+            document.getElementById('customer_id').value = '';
+            document.getElementById('document_number').value = '';
+            document.getElementById('document_date').value = '';
+            
+            // Alle changed-Markierungen entfernen
+            document.querySelectorAll('.form-group input').forEach(input => {
+                input.classList.remove('changed');
+            });
+            
+            // Filename auf Default
+            document.getElementById('generatedFilename').textContent = '---';
+            currentGeneratedFilename = null;
+            
+            // Status auf NOT_GENERATABLE
+            updateStatus(STATUS.NOT_GENERATABLE);
+        }
+
+        // Browser Back/Forward Button Support
+        window.addEventListener('popstate', (event) => {
+            if (event.state && event.state.documentId) {
+                window.DOCUMENT_ID = event.state.documentId;
+                loadDocument();
+                loadNavigation();
+            }
+        });
+
+        // DOCUMENT_ID global verfügbar machen
+        window.DOCUMENT_ID = DOCUMENT_ID;
+
+        // Navigation auch laden
+        loadNavigation();
     </script>
 </body>
 </html>

@@ -27,28 +27,54 @@ class Document(BaseModel):
     document_number: Optional[str] = Field(None, description="Rechnungs-/Dokumentnummer")
     document_date: Optional[date] = Field(None, description="Dokumentdatum")
     
-    def generate_filename(self) -> str:
-        """Generiert standardisierten Dateinamen"""
-        if not self.document_type or not self.correspondent:
-            logger.debug(f"Document {self.id}: Unvollständige Metadaten, verwende Original-Dateinamen")
-            return self.original_filename
+    @staticmethod
+    def build_filename(
+        document_type: Optional[str],
+        correspondent: Optional[str],
+        customer_id: Optional[str] = None,
+        document_number: Optional[str] = None,
+        document_date: Optional[date] = None,
+        fallback_filename: str = "document.pdf"
+    ) -> str:
+        """
+        Statische Methode zur Filename-Generierung ohne Object-Instanz.
+        Perfekt für Previews ohne Memory-Overhead.
+        """
+        if not document_type or not correspondent:
+            return fallback_filename
         
         parts = []
         
-        if self.document_date:
-            parts.append(self.document_date.strftime("%Y%m%d"))
+        if document_date:
+            parts.append(document_date.strftime("%Y%m%d"))
         
-        parts.append(self.correspondent.replace(" ", "_"))
+        parts.append(correspondent.replace(" ", "_"))
         
-        if self.document_number:
-            parts.append(self.document_number)
+        if document_number:
+            parts.append(document_number)
         
-        if self.document_type:
-            parts.append(self.document_type)
+        if document_type:
+            parts.append(document_type)
         
         filename = "_".join(parts) + ".pdf"
-        logger.info(f"Document {self.id}: Generierter Dateiname: {filename}")
         return filename
+    
+    @property
+    def generated_filename(self) -> str:
+        """Computed property für generierten Filename"""
+        return self.build_filename(
+            document_type=self.document_type,
+            correspondent=self.correspondent,
+            customer_id=self.customer_id,
+            document_number=self.document_number,
+            document_date=self.document_date,
+            fallback_filename=self.original_filename
+        )
+    
+    # Deprecated: Für Backwards-Compatibility
+    def generate_filename(self) -> str:
+        """DEPRECATED: Use .generated_filename property instead"""
+        return self.generated_filename
     
     def add_saved_filename(self, filename: str) -> None:
         """Fügt einen Dateinamen zur Speicherhistorie hinzu"""

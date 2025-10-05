@@ -46,7 +46,7 @@ app = FastAPI(
 )
 
 # Include routers
-# app.include_router(pages_router)
+app.include_router(pages_router)
 app.include_router(api_v1_router)
 
 @app.get("/health")
